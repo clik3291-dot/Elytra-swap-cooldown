@@ -1,0 +1,41 @@
+name: Build mod
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Unzip project (if archive is present at repo root)
+        run: |
+          if [ -f "elytra-swap-cooldown.zip" ]; then
+            unzip -o elytra-swap-cooldown.zip -d .
+          fi
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'microsoft'
+          java-version: '21'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10'
+
+      - name: Build with Gradle
+        working-directory: elytra-swap-cooldown
+        run: gradle build --stacktrace
+
+      - name: Upload built jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: elytra-swap-cooldown-jar
+          path: elytra-swap-cooldown/build/libs/*.jar
+          
